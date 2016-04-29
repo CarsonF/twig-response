@@ -1,5 +1,5 @@
 <?php
-namespace GMO\Web\Response;
+namespace Gmo\Web\Response;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
 
