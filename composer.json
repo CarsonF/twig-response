@@ -2,6 +2,7 @@
     "name": "gmo/web",
     "license": "MIT",
     "require": {
+        "gmo/common": "^2.0@dev",
         "nesbot/carbon": "^1.22",
         "php": "^7.1",
         "silex/silex": "^1.3",
