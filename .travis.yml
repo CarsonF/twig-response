@@ -1,0 +1,15 @@
+language: php
+
+sudo: false
+dist: trusty
+
+php:
+  - 7.1
+
+install:
+  - composer install
+
+cache:
+  directories:
+    - vendor
+    - $COMPOSER_CACHE_DIR
