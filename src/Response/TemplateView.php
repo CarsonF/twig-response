@@ -2,7 +2,7 @@
 
 namespace Gmo\Web\Response;
 
-use Symfony\Component\HttpFoundation\ParameterBag;
+use Bolt\Collection\Bag;
 
 /**
  * A view that will be rendered with Twig and converted to a response.
@@ -13,7 +13,7 @@ class TemplateView
 {
     /** @var string */
     protected $template;
-    /** @var ParameterBag */
+    /** @var Bag */
     protected $context;
 
     /**
@@ -40,14 +40,14 @@ class TemplateView
         return $this;
     }
 
-    public function getContext(): ParameterBag
+    public function getContext(): Bag
     {
         return $this->context;
     }
 
     public function setContext(?iterable $context): TemplateView
     {
-        $this->context = new ParameterBag($context);
+        $this->context = new Bag($context);
 
         return $this;
     }

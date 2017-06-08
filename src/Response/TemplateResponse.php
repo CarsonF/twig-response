@@ -2,7 +2,7 @@
 
 namespace Gmo\Web\Response;
 
-use Gmo\Web\Collection\ImmutableParameterBag;
+use Bolt\Collection\ImmutableBag;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -14,7 +14,7 @@ class TemplateResponse extends Response
 {
     /** @var string */
     protected $template;
-    /** @var ImmutableParameterBag */
+    /** @var ImmutableBag */
     protected $context;
 
     /**
@@ -35,7 +35,7 @@ class TemplateResponse extends Response
     ) {
         parent::__construct($content, $status, $headers);
         $this->template = $template;
-        $this->context = new ImmutableParameterBag($context);
+        $this->context = ImmutableBag::from($context);
     }
 
     public function getTemplate(): string
@@ -43,7 +43,7 @@ class TemplateResponse extends Response
         return $this->template;
     }
 
-    public function getContext(): ImmutableParameterBag
+    public function getContext(): ImmutableBag
     {
         return $this->context;
     }
