@@ -3,7 +3,7 @@
 namespace Gmo\Web\Tests\Routing;
 
 use Gmo\Web\Routing\ControllerCollection;
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use Silex\Controller;
 use Silex\Exception\ControllerFrozenException;
 use Silex\Route;
@@ -36,17 +36,20 @@ class ControllerCollectionTest extends TestCase
 
         $controllers->flush();
 
+        $e = null;
         try {
             $fooController->bind('foo2');
             $this->fail();
         } catch (ControllerFrozenException $e) {
         }
+        $this->assertNotNull($e);
 
         try {
             $barController->bind('bar2');
             $this->fail();
         } catch (ControllerFrozenException $e) {
         }
+        $this->assertNotNull($e);
     }
 
     public function testConflictingRouteNames()

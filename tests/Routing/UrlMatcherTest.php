@@ -3,7 +3,7 @@
 namespace Gmo\Web\Tests\Routing;
 
 use Gmo\Web\Routing\UrlMatcher;
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
