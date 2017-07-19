@@ -2,9 +2,11 @@
 
 namespace Gmo\Web\Provider;
 
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Psr\Log\LoggerInterface;
+use Silex\Api\BootableProviderInterface;
 use Silex\Application;
-use Silex\ServiceProviderInterface;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,12 +19,12 @@ use Symfony\Component\HttpKernel\EventListener\DebugHandlersListener;
 /**
  * Error/Exception handler configuration. This should be registered as early as possible.
  */
-class ErrorHandlerServiceProvider implements ServiceProviderInterface
+class ErrorHandlerServiceProvider implements ServiceProviderInterface, BootableProviderInterface
 {
     /**
      * {@inheritdoc}
      */
-    public function register(Application $app)
+    public function register(Container $app)
     {
         // Thrown errors in an integer bit field of E_* constants
         $app['error_handler.throw_at'] = function ($app) {
@@ -41,13 +43,13 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
         $app['exception_handler.enabled'] =
             PHP_SAPI !== 'cli' || !defined('PHPUNIT_COMPOSER_INSTALL');
 
-        $app['error_handler'] = $app->share(function () {
+        $app['error_handler'] = function () {
             return new ErrorHandler(new BufferingLogger());
-        });
+        };
 
         // Exception Handler is registered when this service is invoked if enabled.
         // This is only for bootstrapping. The real one gets set on kernel request / console command event.
-        $app['exception_handler.early'] = function ($app) {
+        $app['exception_handler.early'] = $app->factory(function ($app) {
             static $handler;
 
             if ($handler !== null) {
@@ -73,12 +75,12 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
             }
 
             return $handler;
-        };
+        });
 
         // Listener to set the exception handler from HttpKernel or Console App.
-        $app['debug.handlers_listener'] = $app->share(function () {
+        $app['debug.handlers_listener'] = function () {
             return new DebugHandlersListener();
-        });
+        };
 
         // Added by WebProviderServiceProvider
         if (!isset($app['code.file_link_format'])) {
