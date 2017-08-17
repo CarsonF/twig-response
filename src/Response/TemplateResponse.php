@@ -2,19 +2,19 @@
 
 namespace Gmo\Web\Response;
 
-use Bolt\Collection\ImmutableBag;
+use Bolt\Collection\Bag;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Template response.
  *
- * @@author Carson Full <carsonfull@gmail.com>
+ * @author Carson Full <carsonfull@gmail.com>
  */
 class TemplateResponse extends Response
 {
     /** @var string */
     protected $template;
-    /** @var ImmutableBag */
+    /** @var Bag */
     protected $context;
 
     /**
@@ -35,7 +35,7 @@ class TemplateResponse extends Response
     ) {
         parent::__construct($content, $status, $headers);
         $this->template = $template;
-        $this->context = ImmutableBag::from($context);
+        $this->context = Bag::from($context);
     }
 
     public function getTemplate(): string
@@ -43,7 +43,7 @@ class TemplateResponse extends Response
         return $this->template;
     }
 
-    public function getContext(): ImmutableBag
+    public function getContext(): Bag
     {
         return $this->context;
     }
