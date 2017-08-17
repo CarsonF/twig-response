@@ -2,6 +2,7 @@
 
 namespace Gmo\Web\Provider;
 
+use Bolt\Common\Ini;
 use Psr\Log\LoggerInterface;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -104,7 +105,7 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
             // 2. Converted to an exception and thrown to the user that way.
             // Both of these are regardless of HTML or CLI output.
             // This makes the built-in display_errors redundant.
-            ini_set('display_errors', 0);
+            Ini::set('display_errors', false);
 
             $handler = $app['error_handler'];
             ErrorHandler::register($handler);
