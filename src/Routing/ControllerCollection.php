@@ -88,7 +88,7 @@ class ControllerCollection extends Silex\ControllerCollection implements Default
             } elseif ($controller instanceof ControllerCollection) {
                 $this->flushSubCollection($prefix, $controller, $routes);
             } else {
-                throw new \LogicException('Controllers need to be AbstractController or ControllerCollection instances');
+                throw new \LogicException('Controllers need to be Controller or ControllerCollection instances');
             }
         }
 
