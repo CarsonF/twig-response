@@ -22,7 +22,7 @@ class TemplateView
      * @param string   $template #Template name
      * @param iterable $context  Template context
      */
-    public function __construct(string $template, iterable $context = null)
+    public function __construct(string $template, iterable $context = [])
     {
         $this->setTemplate($template);
         $this->setContext($context);
@@ -45,9 +45,9 @@ class TemplateView
         return $this->context;
     }
 
-    public function setContext(?iterable $context): TemplateView
+    public function setContext(iterable $context): TemplateView
     {
-        $this->context = new MutableBag($context);
+        $this->context = MutableBag::from($context);
 
         return $this;
     }

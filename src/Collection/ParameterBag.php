@@ -25,12 +25,10 @@ class ParameterBag extends ParameterBagBase
      *
      * @param iterable $parameters An array of parameters
      */
-    public function __construct(iterable $parameters = null)
+    public function __construct(iterable $parameters = [])
     {
         if ($parameters instanceof Traversable) {
             $parameters = iterator_to_array($parameters);
-        } elseif ($parameters === null) {
-            $parameters = [];
         }
 
         parent::__construct($parameters);

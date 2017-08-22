@@ -183,7 +183,7 @@ abstract class AbstractController implements ControllerProviderInterface
      *
      * @return TemplateView
      */
-    public function render(string $template, iterable $context = null): TemplateView
+    public function render(string $template, iterable $context = []): TemplateView
     {
         return new TemplateView($template, $context);
     }

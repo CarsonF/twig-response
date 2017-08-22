@@ -28,7 +28,7 @@ class TemplateResponse extends Response
      */
     public function __construct(
         string $template,
-        iterable $context = null,
+        iterable $context = [],
         $content = '',
         int $status = 200,
         array $headers = []
