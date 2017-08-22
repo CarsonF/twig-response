@@ -2,8 +2,8 @@
 
 namespace Gmo\Web\EventListener;
 
-use Gmo\Common\Exception\ParseException;
-use Gmo\Common\Json;
+use Bolt\Common\Exception\ParseException;
+use Bolt\Common\Json;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
