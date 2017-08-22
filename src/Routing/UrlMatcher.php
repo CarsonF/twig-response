@@ -2,7 +2,7 @@
 
 namespace Gmo\Web\Routing;
 
-use Silex\RedirectableUrlMatcher;
+use Silex\Provider\Routing\RedirectableUrlMatcher;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\UrlMatcher as UrlMatcherBase;
 use Symfony\Component\Routing\Route;
