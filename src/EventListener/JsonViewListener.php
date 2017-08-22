@@ -2,35 +2,21 @@
 
 namespace Gmo\Web\EventListener;
 
-use Gmo\Web\Response\TemplateResponse;
-use Gmo\Web\Response\TemplateView;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Twig\Environment;
 
 /**
- * Converts controller results that are TemplateView's to TemplateResponse's.
+ * Converts controller results that are iterables to JsonResponses.
  *
  * @author Carson Full <carsonfull@gmail.com>
  */
-class TemplateViewListener implements EventSubscriberInterface
+class JsonViewListener implements EventSubscriberInterface
 {
-    /** @var Environment */
-    protected $twig;
-
     /**
-     * Constructor.
-     *
-     * @param Environment $twig
-     */
-    public function __construct(Environment $twig)
-    {
-        $this->twig = $twig;
-    }
-
-    /**
-     * If controller result is a TemplateView, convert it to a TemplateResponse.
+     * If controller result is an iterable, convert it to a Response.
      *
      * @param GetResponseForControllerResultEvent $event
      */
@@ -38,7 +24,7 @@ class TemplateViewListener implements EventSubscriberInterface
     {
         $result = $event->getControllerResult();
 
-        if (!$result instanceof TemplateView) {
+        if (!is_iterable($result)) {
             return;
         }
 
@@ -50,15 +36,19 @@ class TemplateViewListener implements EventSubscriberInterface
     /**
      * Render TemplateView to a TemplateResponse.
      *
-     * @param TemplateView $view
+     * @param iterable $view
      *
-     * @return TemplateResponse
+     * @return Response
      */
-    public function render(TemplateView $view): TemplateResponse
+    public function render(iterable $view): Response
     {
-        $content = $this->twig->render($view->getTemplate(), $view->getContext()->toArray());
+        if ($view instanceof \Traversable) {
+            $view = iterator_to_array($view);
+        }
 
-        $response = new TemplateResponse($view->getTemplate(), $view->getContext(), $content);
+        $view['success'] = true;
+
+        $response = new JsonResponse($view);
 
         return $response;
     }
