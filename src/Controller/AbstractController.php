@@ -3,6 +3,7 @@
 namespace Gmo\Web\Controller;
 
 use Gmo\Web\Response\TemplateView;
+use Psr\Container\ContainerInterface;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
@@ -19,7 +20,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 /**
  * Abstract controller class with shortcut methods.
  */
-abstract class AbstractController implements ControllerProviderInterface
+abstract class AbstractController implements ControllerProviderInterface, ContainerInterface
 {
     /** @var Application */
     protected $app;
@@ -60,6 +61,22 @@ abstract class AbstractController implements ControllerProviderInterface
     protected function createControllerCollection(Application $app): ControllerCollection
     {
         return $app['controllers_factory'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function get($id)
+    {
+        return $this->app['container']->get($id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function has($id)
+    {
+        return $this->app['container']->has($id);
     }
 
     /**
