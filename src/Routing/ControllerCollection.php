@@ -61,7 +61,7 @@ class ControllerCollection extends Silex\ControllerCollection implements Default
      */
     public function flush($prefix = '')
     {
-        return $this->flushCollection($prefix, $this, new RouteCollection());
+        return $this->flushCollection($prefix, $this, $this->routesFactory ?: new RouteCollection());
     }
 
     /**
