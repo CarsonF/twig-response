@@ -61,6 +61,17 @@ class RoutingServiceProvider implements ServiceProviderInterface
             );
         });
 
+        // Replaces built-in service
+        $app['locale.listener'] = $app->share(function ($app) {
+            return new Listener\LocaleListener(
+                $app,
+                $app['request_stack'],
+                $app['request_context'],
+                $app['supported_locales'],
+                $app['locale']
+            );
+        });
+
         $app['routing.listener.request.json'] = $app->share(function ($app) {
             return new Listener\JsonRequestTransformerListener($app['routes']);
         });
@@ -87,6 +98,7 @@ class RoutingServiceProvider implements ServiceProviderInterface
 
         /** @var EventDispatcherInterface $dispatcher */
         $dispatcher = $app['dispatcher'];
+        $dispatcher->addSubscriber($app['locale.listener']);
         $dispatcher->addSubscriber($app['routing.listener.request.json']);
         $dispatcher->addSubscriber($app['routing.listener.exception.json']);
         $dispatcher->addSubscriber($app['routing.listener.view.template']);
