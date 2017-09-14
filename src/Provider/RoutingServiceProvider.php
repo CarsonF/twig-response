@@ -72,6 +72,10 @@ class RoutingServiceProvider implements ServiceProviderInterface
             );
         });
 
+        $app['routing.listener.request_id'] = $app->share(function () {
+            return new Listener\RequestIdListener();
+        });
+
         $app['routing.listener.request.json'] = $app->share(function ($app) {
             return new Listener\JsonRequestTransformerListener($app['routes']);
         });
@@ -99,6 +103,7 @@ class RoutingServiceProvider implements ServiceProviderInterface
         /** @var EventDispatcherInterface $dispatcher */
         $dispatcher = $app['dispatcher'];
         $dispatcher->addSubscriber($app['locale.listener']);
+        $dispatcher->addSubscriber($app['routing.listener.request_id']);
         $dispatcher->addSubscriber($app['routing.listener.request.json']);
         $dispatcher->addSubscriber($app['routing.listener.exception.json']);
         $dispatcher->addSubscriber($app['routing.listener.view.template']);
