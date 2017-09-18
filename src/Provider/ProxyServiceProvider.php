@@ -12,6 +12,7 @@ use ProxyManager\Proxy\LazyLoadingInterface;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Twig;
 use Webmozart\PathUtil\Path;
 
 /**
@@ -23,6 +24,10 @@ class ProxyServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
+        $app['twig.lazy'] = $app->share(function ($app) {
+            return $app['lazy']('twig', Twig\Environment::class);
+        });
+
         $app['proxy.target_dir'] = $app->share(function ($app) {
             if (!isset($app['root_path'])) {
                 return sys_get_temp_dir();
