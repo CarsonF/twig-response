@@ -47,6 +47,9 @@ class RequestProcessor
         if ($referer = $request->headers->get('referer')) {
             $params['referer'] = $referer;
         }
+        if ($id = $request->headers->get('X-Request-Id')) {
+            $params['id'] = $id;
+        }
 
         $record['extra']['request'] = $params;
 

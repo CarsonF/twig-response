@@ -70,6 +70,10 @@ class RoutingServiceProvider implements ServiceProviderInterface, BootableProvid
             );
         };
 
+        $app['routing.listener.request_id'] = function () {
+            return new Listener\RequestIdListener();
+        };
+
         $app['routing.listener.request.json'] = function ($app) {
             return new Listener\JsonRequestTransformerListener($app['routes']);
         };
@@ -79,7 +83,7 @@ class RoutingServiceProvider implements ServiceProviderInterface, BootableProvid
         };
 
         $app['routing.listener.view.template'] = function ($app) {
-            return new Listener\TemplateViewListener($app['twig']);
+            return new Listener\TemplateViewListener($app['twig.lazy'] ?? $app['twig']);
         };
 
         $app['routing.listener.view.json'] = function () {
@@ -97,6 +101,7 @@ class RoutingServiceProvider implements ServiceProviderInterface, BootableProvid
 
     public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
     {
+        $dispatcher->addSubscriber($app['routing.listener.request_id']);
         $dispatcher->addSubscriber($app['routing.listener.request.json']);
         $dispatcher->addSubscriber($app['routing.listener.exception.json']);
         $dispatcher->addSubscriber($app['routing.listener.view.template']);
