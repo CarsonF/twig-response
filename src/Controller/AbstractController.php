@@ -4,9 +4,9 @@ namespace Gmo\Web\Controller;
 
 use Gmo\Web\Response\TemplateView;
 use Psr\Container\ContainerInterface;
+use Silex\Api\ControllerProviderInterface;
 use Silex\Application;
 use Silex\ControllerCollection;
-use Silex\ControllerProviderInterface;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
