@@ -83,6 +83,10 @@ class RoutingServiceProvider implements ServiceProviderInterface, BootableProvid
         };
 
         $app['routing.listener.view.template'] = function ($app) {
+            if (!isset($app['twig'])) {
+                return new Listener\NullListener();
+            }
+
             return new Listener\TemplateViewListener($app['twig.lazy'] ?? $app['twig']);
         };
 
