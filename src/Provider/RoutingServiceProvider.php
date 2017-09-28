@@ -85,6 +85,10 @@ class RoutingServiceProvider implements ServiceProviderInterface
         });
 
         $app['routing.listener.view.template'] = $app->share(function ($app) {
+            if (!isset($app['twig'])) {
+                return new Listener\NullListener();
+            }
+
             return new Listener\TemplateViewListener($app['twig.lazy'] ?? $app['twig']);
         });
 
