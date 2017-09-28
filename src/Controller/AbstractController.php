@@ -30,9 +30,9 @@ abstract class AbstractController implements ControllerProviderInterface, Contai
      *
      * @param ControllerCollection $controllers
      *
-     * @return null|ControllerCollection
+     * @return void|ControllerCollection
      */
-    abstract public function defineRoutes(ControllerCollection $controllers): ?ControllerCollection;
+    abstract protected function defineRoutes(ControllerCollection $controllers);
 
     /**
      * {@inheritdoc}
