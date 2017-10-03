@@ -71,6 +71,8 @@ class LoggerServiceProvider implements ServiceProviderInterface
         $app['logger.processors'] = $app->share(function ($app) {
             $processors = new MutableBag();
 
+            $processors[] = new Processor\JsonSerializableProcessor();
+
             return $processors;
         });
 
