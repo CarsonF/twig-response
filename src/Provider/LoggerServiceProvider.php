@@ -5,8 +5,16 @@ namespace Gmo\Web\Provider;
 use Bolt\Collection\Arr;
 use Bolt\Collection\MutableBag;
 use Bolt\Common\Str;
+use Gmo\Common\Log\Handler\FallbackHandler;
 use Gmo\Web\EventListener\HttpLogListener;
+use Gmo\Web\Logger\Formatter\LogstashFormatter;
+use Gmo\Web\Logger\Processor;
+use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\NullHandler;
+use Monolog\Handler\RedisHandler;
+use Monolog\Handler\SyslogHandler;
+use Predis;
+use Psr\Log\LogLevel;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Symfony\Bridge\Monolog\Handler\DebugHandler;
@@ -15,12 +23,14 @@ use Symfony\Bridge\Monolog\Processor\DebugProcessor;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Basic Monolog services structure. Handlers and processors are left to be filled in.
+ * Monolog services.
  *
  * @author Carson Full <carsonfull@gmail.com>
  */
 class LoggerServiceProvider implements ServiceProviderInterface
 {
+    private const CLI = PHP_SAPI === 'cli';
+
     public function register(Application $app)
     {
         $app['logger'] = $app->share(function ($app) {
@@ -51,6 +61,10 @@ class LoggerServiceProvider implements ServiceProviderInterface
         $app['logger.handlers'] = $app->share(function ($app) {
             $handlers = new MutableBag();
 
+            if (($env = $app['environment']) && ($env === 'production' || $env === 'staging')) {
+                $handlers[] = $app['logger.handler.logstash'];
+            }
+
             return $handlers;
         });
 
@@ -63,6 +77,80 @@ class LoggerServiceProvider implements ServiceProviderInterface
         $app['logger.listener.http'] = $app->share(function ($app) {
             return new HttpLogListener($app['logger']);
         });
+
+
+        //region Processors
+
+        $app['logger.processor.env'] = $app->share(function ($app) {
+            return new Processor\ConstantProcessor('env', $app['environment']);
+        });
+
+        $app['logger.processor.request'] = $app->share(function ($app) {
+            return new Processor\RequestProcessor($app['request_stack']);
+        });
+
+        //endregion
+
+        //region Handlers
+
+        $app['logger.redis'] = $app->share(function () {
+            return new Predis\Client(['database' => 4]);
+        });
+
+        //region Logstash
+
+        $app['logger.handler.logstash'] = $app->share(function ($app) {
+            $handler = new RedisHandler(
+                $app['logger.redis'],
+                $app['logger.handler.logstash.key'] ?? 'logging',
+                // Keep everything for web requests since they are filtered down with the
+                // FingersCrossedHandler using the `logger.handler.logstash.level` value.
+                self::CLI ? $app['logger.handler.logstash.level'] : Logger::DEBUG,
+                true,
+                $app['logger.handler.logstash.cap_size'] ?? 10000
+            );
+
+            // Fallback to syslog handler on Redis server/connection exceptions
+            $handler = new FallbackHandler(
+                $handler,
+                $app['logger.handler.syslog'],
+                [
+                    Predis\Connection\ConnectionException::class,
+                    Predis\Response\ServerException::class,
+                ]
+            );
+
+            // Add processors here so they aren't ran unless needed with FingersCrossedHandler
+            $handler->pushProcessor($app['logger.processor.env']);
+            $handler->pushProcessor($app['logger.processor.request']);
+
+            // Wrap in FingersCrossedHandler for web requests
+            if (!self::CLI) {
+                $handler = new FingersCrossedHandler($handler, LogLevel::WARNING);
+                $handler->setLevel($app['logger.handler.logstash.level']);
+            }
+
+            return $handler;
+        });
+
+        $app['logger.handler.logstash.level'] = $app->share(function ($app) {
+            $isProd = $app['environment'] === 'production';
+
+            return $isProd ? LogLevel::INFO : LogLevel::DEBUG;
+        });
+
+        $app['logger.formatter.logstash'] = $app->share(function ($app) {
+            return new LogstashFormatter($app['app_name']);
+        });
+
+        //endregion
+
+        $app['logger.handler.syslog'] = $app->share(function ($app) {
+            return new SyslogHandler($app['app_name'], LOG_USER, LogLevel::ERROR);
+        });
+
+        //endregion
+
     }
 
     public function boot(Application $app)
