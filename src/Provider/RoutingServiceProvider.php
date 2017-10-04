@@ -13,6 +13,7 @@ use Pimple\ServiceProviderInterface;
 use Silex\Api\BootableProviderInterface;
 use Silex\Api\EventListenerProviderInterface;
 use Silex\Application;
+use Silex\Provider\LocaleServiceProvider;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -58,6 +59,12 @@ class RoutingServiceProvider implements ServiceProviderInterface, BootableProvid
                 }
             );
         };
+
+        // Register LocaleSP if needed because it will subscribe the listener.
+        // If we subscribe it we don't know if we are duplicating the subscription.
+        if (!isset($app['locale.listener'])) {
+            $app->register(new LocaleServiceProvider());
+        }
 
         // Replaces built-in service
         $app['locale.listener'] = function ($app) {
