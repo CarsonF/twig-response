@@ -18,7 +18,9 @@ use Symfony\Component\Debug\ExceptionHandler;
 use Symfony\Component\HttpKernel\EventListener\DebugHandlersListener;
 
 /**
- * Error/Exception handler configuration. This should be registered as early as possible.
+ * Error/Exception handler configuration.
+ *
+ * @author Carson Full <carsonfull@gmail.com>
  */
 class ErrorHandlerServiceProvider implements ServiceProviderInterface, BootableProviderInterface
 {
@@ -86,6 +88,15 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface, BootableP
         // Added by WebProviderServiceProvider
         if (!isset($app['code.file_link_format'])) {
             $app['code.file_link_format'] = null;
+        }
+
+        // Move this SP to be first in the provider list, so
+        // error handlers are configured before anything else.
+        if ($app instanceof Application) {
+            (function () {
+                $sp = array_pop($this->providers);
+                array_unshift($this->providers, $sp);
+            })->call($app);
         }
     }
 

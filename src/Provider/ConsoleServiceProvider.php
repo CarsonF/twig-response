@@ -12,7 +12,7 @@ class ConsoleServiceProvider implements ServiceProviderInterface
     public function register(Container $app)
     {
         $app['console'] = function ($app) {
-            $console = new \Gmo\Common\Console\Application($app['console.name'], null, $app['container']);
+            $console = new \Gmo\Common\Console\Application($app['app_name'], null, $app['container']);
 
             $console->setDispatcher($app['dispatcher']);
 
@@ -24,8 +24,6 @@ class ConsoleServiceProvider implements ServiceProviderInterface
 
             return $console;
         };
-
-        $app['console.name'] = 'UNKNOWN';
 
         $app['console.commands'] = function () {
             return new MutableBag();
