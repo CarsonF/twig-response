@@ -59,7 +59,7 @@ class ParameterBag extends ParameterBagBase
      *
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function get($key, $default = null, $deep = false)
     {
         if (!$this->required) {
             return parent::get($key, $default);
