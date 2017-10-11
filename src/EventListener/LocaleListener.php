@@ -126,9 +126,7 @@ class LocaleListener implements EventSubscriberInterface
 
         $locale = $request->query->getAlpha($this->queryStringKey);
 
-        $locales = array_flip($this->supportedLocales);
-
-        return $locales[$locale] ?? $default;
+        return in_array($locale, $this->supportedLocales) ? $locale : $default;
     }
 
     /**

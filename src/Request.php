@@ -3,14 +3,14 @@
 namespace Gmo\Web;
 
 use Gmo\Web\Collection\ParameterBag;
-use Symfony\Component\HttpFoundation\Request as RequestBase;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 /**
  * {@inheritdoc}
  *
  * Sub-classing to use our ParameterBag.
  */
-class Request extends RequestBase
+class Request extends SymfonyRequest
 {
     /**
      * Query string parameters ($_GET).
@@ -56,5 +56,29 @@ class Request extends RequestBase
         }
 
         return $request;
+    }
+
+    /**
+     * Cast a Symfony Request to our subclass.
+     *
+     * @param SymfonyRequest $request
+     *
+     * @return Request
+     */
+    public static function cast(SymfonyRequest $request): Request
+    {
+        if ($request instanceof self) {
+            return $request;
+        }
+
+        return new static(
+            $request->query->all(),
+            $request->request->all(),
+            $request->attributes->all(),
+            $request->cookies->all(),
+            $request->files->all(),
+            $request->server->all(),
+            $request->getContent(true)
+        );
     }
 }

@@ -3,6 +3,7 @@
 namespace Gmo\Web\Controller;
 
 use Gmo\Web\Response\TemplateView;
+use Gmo\Web\Routing\DefaultControllerAwareInterface;
 use Psr\Container\ContainerInterface;
 use Silex\Api\ControllerProviderInterface;
 use Silex\Application;
@@ -42,6 +43,10 @@ abstract class AbstractController implements ControllerProviderInterface, Contai
         $this->app = $app;
 
         $controllers = $this->createControllerCollection($app);
+
+        if ($controllers instanceof DefaultControllerAwareInterface) {
+            $controllers->setDefaultControllerClass($this);
+        }
 
         $new = $this->defineRoutes($controllers);
         if ($new instanceof ControllerCollection) {
