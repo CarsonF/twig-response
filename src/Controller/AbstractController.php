@@ -2,10 +2,10 @@
 
 namespace Gmo\Web\Controller;
 
+use Gmo\Web\Routing\ControllerCollection;
 use Gmo\Web\Routing\DefaultControllerAwareInterface;
 use Psr\Container\ContainerInterface;
 use Silex\Application;
-use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
 
 /**

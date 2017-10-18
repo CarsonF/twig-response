@@ -7,6 +7,7 @@ use Gmo\Web\RequestFactory;
 use Gmo\Web\Routing\ControllerCollection;
 use Gmo\Web\Routing\LazyUrlGenerator;
 use Gmo\Web\Routing\LocaleControllerCollection;
+use Gmo\Web\Routing\Route;
 use Gmo\Web\Routing\UrlMatcher;
 use Silex\Application;
 use Silex\Provider\UrlGeneratorServiceProvider;
@@ -21,6 +22,8 @@ class RoutingServiceProvider implements ServiceProviderInterface
         $app['supported_locales'] = $app->share(function ($app) {
             return [$app['locale']];
         });
+
+        $app['route_class'] = Route::class;
 
         $app['controllers_factory.default'] = function ($app) {
             return new ControllerCollection($app['route_factory']);
