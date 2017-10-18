@@ -16,7 +16,7 @@ abstract class AbstractController implements ControllerProviderInterface, Contai
     use ShortcutsTrait;
 
     /** @var Application */
-    protected $app;
+    private $app;
 
     /**
      * Define the routes/controllers for this collection.
@@ -30,11 +30,11 @@ abstract class AbstractController implements ControllerProviderInterface, Contai
     /**
      * {@inheritdoc}
      */
-    public function connect(Application $app): ControllerCollection
+    final public function connect(Application $app): ControllerCollection
     {
         $this->app = $app;
 
-        $controllers = $this->createControllerCollection($app);
+        $controllers = $this->createControllerCollection($app['container']);
 
         if ($controllers instanceof DefaultControllerAwareInterface) {
             $controllers->setDefaultControllerClass($this);
@@ -51,13 +51,13 @@ abstract class AbstractController implements ControllerProviderInterface, Contai
     /**
      * Create and return a new controller collection.
      *
-     * @param Application $app
+     * @param ContainerInterface $container
      *
      * @return ControllerCollection
      */
-    protected function createControllerCollection(Application $app): ControllerCollection
+    protected function createControllerCollection(ContainerInterface $container): ControllerCollection
     {
-        return $app['controllers_factory'];
+        return $container->get('controllers_factory');
     }
 
     /**
