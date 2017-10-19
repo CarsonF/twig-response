@@ -42,7 +42,7 @@ class Route extends \Silex\Route
      *
      * @return Route
      */
-    public function option(string $name, mixed $value)
+    public function option(string $name, $value)
     {
         $this->setOption($name, $value);
 
