@@ -3,7 +3,6 @@
 namespace Gmo\Web\Routing;
 
 use Silex;
-use Silex\Controller;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
@@ -13,6 +12,17 @@ use Symfony\Component\Routing\RouteCollection;
  * - Allow a null route to default to specified class method.
  * - Split flush method to make it easier to override
  * - Remove trailing slash from flushed routes
+ *
+ * @method $this assert(string $variable, string $regexp)
+ * @method $this value(string $variable, mixed $default)
+ * @method $this convert(string $variable, mixed $callback)
+ * @method $this method(string $method)
+ * @method $this requireHttp()
+ * @method $this requireHttps()
+ * @method $this before(mixed $callback)
+ * @method $this after(mixed $callback)
+ * @method $this option(string $name, mixed $value)
+ * @method $this secure(string|array ...$roles)
  */
 class ControllerCollection extends Silex\ControllerCollection implements DefaultControllerAwareInterface
 {
@@ -21,14 +31,87 @@ class ControllerCollection extends Silex\ControllerCollection implements Default
     /** @var string */
     protected $defaultControllerMethod;
 
+    //region Override parent methods to return our subclass for IDE completion.
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return Controller
+     */
+    public function get($pattern, $to = null)
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return parent::get($pattern, $to);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return Controller
+     */
+    public function post($pattern, $to = null)
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return parent::post($pattern, $to);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return Controller
+     */
+    public function put($pattern, $to = null)
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return parent::put($pattern, $to);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return Controller
+     */
+    public function delete($pattern, $to = null)
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return parent::delete($pattern, $to);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return Controller
+     */
+    public function options($pattern, $to = null)
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return parent::options($pattern, $to);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return Controller
+     */
+    public function patch($pattern, $to = null)
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return parent::patch($pattern, $to);
+    }
+
+    //endregion
+
     /**
      * This uses default class/method if not provided
      *
      * {@inheritdoc}
+     *
+     * @return Controller
      */
     public function match($pattern, $to = null)
     {
         if (!$this->defaultControllerClass) {
+            /** @noinspection PhpIncompatibleReturnTypeInspection */
             return parent::match($pattern, $to);
         }
         if ($to === null && $this->defaultControllerMethod) {
@@ -37,6 +120,7 @@ class ControllerCollection extends Silex\ControllerCollection implements Default
             $to = [$this->defaultControllerClass, substr($to, 2)];
         }
 
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return parent::match($pattern, $to);
     }
 
@@ -83,7 +167,7 @@ class ControllerCollection extends Silex\ControllerCollection implements Default
         $prefix = $this->normalizePrefix($prefix);
 
         foreach ($collection->controllers as $controller) {
-            if ($controller instanceof Controller) {
+            if ($controller instanceof Silex\Controller) {
                 $this->flushController($prefix, $controller, $routes);
             } elseif ($controller instanceof ControllerCollection) {
                 $this->flushSubCollection($prefix, $controller, $routes);
@@ -100,11 +184,11 @@ class ControllerCollection extends Silex\ControllerCollection implements Default
     /**
      * Add the AbstractController to the RouteCollection and freeze it
      *
-     * @param string          $prefix
-     * @param Controller      $controller
-     * @param RouteCollection $routes
+     * @param string           $prefix
+     * @param Silex\Controller $controller
+     * @param RouteCollection  $routes
      */
-    protected function flushController(string $prefix, Controller $controller, RouteCollection $routes): void
+    protected function flushController(string $prefix, Silex\Controller $controller, RouteCollection $routes): void
     {
         // When mounting a controller class with a prefix most times you have a route with a blank path.
         // That is the only route that flushes to include an (unwanted) trailing slash.
@@ -151,10 +235,10 @@ class ControllerCollection extends Silex\ControllerCollection implements Default
      *
      * Note: same code as in {@see Silex\ControllerCollection::flush}
      *
-     * @param RouteCollection $routes
-     * @param Controller      $controller
+     * @param RouteCollection  $routes
+     * @param Silex\Controller $controller
      */
-    protected function generateControllerName(RouteCollection $routes, Controller $controller): void
+    protected function generateControllerName(RouteCollection $routes, Silex\Controller $controller): void
     {
         if (!$name = $controller->getRouteName()) {
             $name = $controller->generateRouteName('');

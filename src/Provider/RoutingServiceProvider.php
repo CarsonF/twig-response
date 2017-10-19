@@ -7,6 +7,7 @@ use Gmo\Web\RequestFactory;
 use Gmo\Web\Routing\ControllerCollection;
 use Gmo\Web\Routing\LazyUrlGenerator;
 use Gmo\Web\Routing\LocaleControllerCollection;
+use Gmo\Web\Routing\Route;
 use Gmo\Web\Routing\UrlMatcher;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -24,6 +25,8 @@ class RoutingServiceProvider implements ServiceProviderInterface, BootableProvid
         $app['supported_locales'] = function ($app) {
             return [$app['locale']];
         };
+
+        $app['route_class'] = Route::class;
 
         $app['controllers_factory.default'] = $app->factory(function ($app) {
             return new ControllerCollection($app['route_factory']);
