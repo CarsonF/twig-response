@@ -81,11 +81,6 @@ class ProxyServiceProvider implements ServiceProviderInterface
             /** @var Configuration $config */
             $config = $app['proxy.config'];
 
-            $dir = $config->getProxiesTargetDir();
-            if (!file_exists($dir)) {
-                (new Filesystem())->mkdir($dir);
-            }
-
             spl_autoload_register($config->getProxyAutoloader());
         };
 
@@ -110,7 +105,13 @@ class ProxyServiceProvider implements ServiceProviderInterface
         };
 
         $app['proxy.file_locator'] = function ($app) {
-            return new FileLocator($app['proxy.target_dir']);
+            $dir = $app['proxy.target_dir'];
+
+            if (!file_exists($dir)) {
+                (new Filesystem())->mkdir($dir);
+            }
+
+            return new FileLocator($dir);
         };
 
         $app['proxy.generator_strategy'] = function ($app) {
