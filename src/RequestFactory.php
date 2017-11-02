@@ -65,7 +65,7 @@ class RequestFactory
         if ($proxies === true) {
             $proxies = ['127.0.0.1', $request->server->get('REMOTE_ADDR')];
         }
-        if ($proxies === false) {
+        if ($proxies !== false) {
             Request::setTrustedProxies((array) $proxies);
         }
     }
