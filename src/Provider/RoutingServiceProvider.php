@@ -84,8 +84,12 @@ class RoutingServiceProvider implements ServiceProviderInterface, BootableProvid
             return new Listener\RequestIdListener();
         };
 
+        $app['routing.listener.request.format'] = function ($app) {
+            return new Listener\RequestFormatListener($app['supported_formats'] ?? ['html', 'json']);
+        };
+
         $app['routing.listener.request.json'] = function ($app) {
-            return new Listener\JsonRequestTransformerListener($app['routes']);
+            return new Listener\JsonRequestTransformerListener();
         };
 
         $app['routing.listener.exception.json'] = function () {
@@ -93,11 +97,7 @@ class RoutingServiceProvider implements ServiceProviderInterface, BootableProvid
         };
 
         $app['routing.listener.view.template'] = function ($app) {
-            if (!isset($app['twig'])) {
-                return new Listener\NullListener();
-            }
-
-            return new Listener\TemplateViewListener($app['twig.lazy'] ?? $app['twig']);
+            return new Listener\TemplateViewListener($app['twig.lazy'] ?? $app['twig'] ?? null);
         };
 
         $app['routing.listener.view.json'] = function () {
@@ -116,6 +116,7 @@ class RoutingServiceProvider implements ServiceProviderInterface, BootableProvid
     public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
     {
         $dispatcher->addSubscriber($app['routing.listener.request_id']);
+        $dispatcher->addSubscriber($app['routing.listener.request.format']);
         $dispatcher->addSubscriber($app['routing.listener.request.json']);
         $dispatcher->addSubscriber($app['routing.listener.exception.json']);
         $dispatcher->addSubscriber($app['routing.listener.view.template']);

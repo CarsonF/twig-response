@@ -9,29 +9,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Routing\RouteCollection;
 
 /**
- * Parses JSON body to request bag if:
- * - Request's content type is json
- * - Request's route has json=true option. This forces parsing when header isn't set (used to skip
- *   fetch's preflight check). This is optional and depends on RouteCollection to be passed in.
+ * Parse JSON body to Request's request bag.
+ *
+ * The transformation is done when the Request has a body and
+ * either the format of the Content-Type header is "json" (see get/setFormat)
+ * or the request format is "json" (via setRequestFormat() or via "_format" attribute).
  */
 class JsonRequestTransformerListener implements EventSubscriberInterface
 {
-    /** @var RouteCollection|null */
-    protected $routes;
-
-    /**
-     * Constructor.
-     *
-     * @param RouteCollection|null $routes
-     */
-    public function __construct(RouteCollection $routes = null)
-    {
-        $this->routes = $routes;
-    }
-
     public function onKernelRequest(GetResponseEvent $event)
     {
         $request = $event->getRequest();
@@ -56,14 +43,7 @@ class JsonRequestTransformerListener implements EventSubscriberInterface
 
     protected function isJsonRequest(Request $request)
     {
-        if ($this->routes) {
-            $route = $this->routes->get($request->attributes->get('_route'));
-            if ($route && $route->getOption('json')) {
-                return true;
-            }
-        }
-
-        return $request->getContentType() === 'json';
+        return $request->getContentType() === 'json' || $request->getRequestFormat() === 'json';
     }
 
     protected function transformJsonBody(Request $request)
