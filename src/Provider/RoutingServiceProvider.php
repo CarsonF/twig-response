@@ -80,7 +80,7 @@ class RoutingServiceProvider implements ServiceProviderInterface
         });
 
         $app['routing.listener.request.json'] = $app->share(function ($app) {
-            return new Listener\JsonRequestTransformerListener($app['routes']);
+            return new Listener\JsonRequestTransformerListener();
         });
 
         $app['routing.listener.exception.json'] = $app->share(function () {
