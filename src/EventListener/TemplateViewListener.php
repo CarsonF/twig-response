@@ -5,6 +5,7 @@ namespace Gmo\Web\EventListener;
 use Gmo\Web\Response\TemplateResponse;
 use Gmo\Web\Response\TemplateView;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Twig\Environment;
@@ -16,15 +17,15 @@ use Twig\Environment;
  */
 class TemplateViewListener implements EventSubscriberInterface
 {
-    /** @var Environment */
+    /** @var Environment|null */
     protected $twig;
 
     /**
      * Constructor.
      *
-     * @param Environment $twig
+     * @param Environment|null $twig
      */
-    public function __construct(Environment $twig)
+    public function __construct(?Environment $twig)
     {
         $this->twig = $twig;
     }
@@ -42,9 +43,19 @@ class TemplateViewListener implements EventSubscriberInterface
             return;
         }
 
-        $response = $this->render($result);
+        $format = $event->getRequest()->getRequestFormat();
 
-        $event->setResponse($response);
+        if ($format === 'json') {
+            $event->setControllerResult($result->getContext());
+
+            return;
+        } elseif ($format !== 'html') {
+            return;
+        }
+
+        if ($response = $this->render($result)) {
+            $event->setResponse($response);
+        }
     }
 
     /**
@@ -52,10 +63,14 @@ class TemplateViewListener implements EventSubscriberInterface
      *
      * @param TemplateView $view
      *
-     * @return TemplateResponse
+     * @return Response|null
      */
-    public function render(TemplateView $view): TemplateResponse
+    public function render(TemplateView $view): ?Response
     {
+        if (!$this->twig) {
+            return null;
+        }
+
         $content = $this->twig->render($view->getTemplate(), $view->getContext()->toArray());
 
         $response = new TemplateResponse($view->getTemplate(), $view->getContext(), $content);
@@ -69,7 +84,7 @@ class TemplateViewListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::VIEW => 'onView',
+            KernelEvents::VIEW => ['onView', 1], // before json
         ];
     }
 }

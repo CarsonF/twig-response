@@ -79,6 +79,10 @@ class RoutingServiceProvider implements ServiceProviderInterface
             return new Listener\RequestIdListener();
         });
 
+        $app['routing.listener.request.format'] = $app->share(function ($app) {
+            return new Listener\RequestFormatListener($app['supported_formats'] ?? ['html', 'json']);
+        });
+
         $app['routing.listener.request.json'] = $app->share(function ($app) {
             return new Listener\JsonRequestTransformerListener();
         });
@@ -88,11 +92,7 @@ class RoutingServiceProvider implements ServiceProviderInterface
         });
 
         $app['routing.listener.view.template'] = $app->share(function ($app) {
-            if (!isset($app['twig'])) {
-                return new Listener\NullListener();
-            }
-
-            return new Listener\TemplateViewListener($app['twig.lazy'] ?? $app['twig']);
+            return new Listener\TemplateViewListener($app['twig.lazy'] ?? $app['twig'] ?? null);
         });
 
         $app['routing.listener.view.json'] = $app->share(function () {
@@ -111,6 +111,7 @@ class RoutingServiceProvider implements ServiceProviderInterface
         $dispatcher = $app['dispatcher'];
         $dispatcher->addSubscriber($app['locale.listener']);
         $dispatcher->addSubscriber($app['routing.listener.request_id']);
+        $dispatcher->addSubscriber($app['routing.listener.request.format']);
         $dispatcher->addSubscriber($app['routing.listener.request.json']);
         $dispatcher->addSubscriber($app['routing.listener.exception.json']);
         $dispatcher->addSubscriber($app['routing.listener.view.template']);
