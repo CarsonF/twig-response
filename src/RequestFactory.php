@@ -2,6 +2,8 @@
 
 namespace Gmo\Web;
 
+use Symfony\Component\HttpKernel\Kernel;
+
 class RequestFactory
 {
     protected $options = [];
@@ -15,6 +17,7 @@ class RequestFactory
     {
         $options += [
             'trust_proxies' => true,
+            'trusted_headers' => Kernel::MAJOR_VERSION >= 3 ? Request::HEADER_X_FORWARDED_AWS_ELB : -1,
         ];
         $this->options = $options;
     }
@@ -63,10 +66,15 @@ class RequestFactory
     {
         $proxies = $this->options['trust_proxies'];
         if ($proxies === true) {
+            // trust *all* requests
             $proxies = ['127.0.0.1', $request->server->get('REMOTE_ADDR')];
         }
         if ($proxies !== false) {
-            Request::setTrustedProxies((array) $proxies);
+            $args = [(array) $proxies];
+            if (Kernel::MAJOR_VERSION >= 3) {
+                $args[] = $this->options['trusted_headers'];
+            }
+            Request::setTrustedProxies(...$args);
         }
     }
 }
