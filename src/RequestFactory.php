@@ -16,7 +16,7 @@ class RequestFactory
     public function __construct(array $options = [])
     {
         $options += [
-            'trust_proxies' => true,
+            'trusted_proxies' => true,
             'trusted_headers' => Kernel::MAJOR_VERSION >= 3 ? Request::HEADER_X_FORWARDED_AWS_ELB : -1,
         ];
         $this->options = $options;
@@ -64,7 +64,7 @@ class RequestFactory
 
     protected function modifyRequest(Request $request): void
     {
-        $proxies = $this->options['trust_proxies'];
+        $proxies = $this->options['trusted_proxies'];
         if ($proxies === true) {
             // trust *all* requests
             $proxies = ['127.0.0.1', $request->server->get('REMOTE_ADDR')];
