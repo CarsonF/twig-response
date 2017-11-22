@@ -22,6 +22,7 @@ class DebugHandlersListener extends BaseListener
 
     public function __construct(bool $cliPrintTrace)
     {
+        $this->cliPrintTrace = $cliPrintTrace;
         parent::__construct(null);
     }
 
@@ -38,7 +39,7 @@ class DebugHandlersListener extends BaseListener
                 $output = $output->getErrorOutput();
             }
 
-            $verbosity = $this->cliPrintTrace ? OutputInterface::VERBOSITY_VERBOSE : OutputInterface::OUTPUT_NORMAL;
+            $verbosity = $this->cliPrintTrace ? OutputInterface::VERBOSITY_VERBOSE : OutputInterface::VERBOSITY_NORMAL;
 
             $handler = function ($e) use ($app, $output, $verbosity) {
                 $prevVerbosity = $output->getVerbosity();
