@@ -3,6 +3,7 @@
 namespace Gmo\Web\Provider;
 
 use Bolt\Common\Ini;
+use Gmo\Web\EventListener\DebugHandlersListener;
 use Psr\Log\LoggerInterface;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -13,7 +14,6 @@ use Symfony\Component\Debug\BufferingLogger;
 use Symfony\Component\Debug\DebugClassLoader;
 use Symfony\Component\Debug\ErrorHandler;
 use Symfony\Component\Debug\ExceptionHandler;
-use Symfony\Component\HttpKernel\EventListener\DebugHandlersListener;
 
 /**
  * Error/Exception handler configuration.
@@ -69,8 +69,9 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
             if (PHP_SAPI === 'cli' && class_exists(ConsoleApplication::class)) {
                 $handler->setHandler(function ($e) {
                     $app = new ConsoleApplication();
-                    $output = new ConsoleOutput(OutputInterface::VERBOSITY_DEBUG);
-                    $app->renderException($e, $output);
+                    $verbosity = ($app['exception_handler.cli_print_trace'] ?? $app['debug'])
+                        ? OutputInterface::VERBOSITY_VERBOSE : OutputInterface::OUTPUT_NORMAL;
+                    $app->renderException($e, new ConsoleOutput($verbosity));
                     ob_clean();
                 });
             }
@@ -79,8 +80,8 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
         };
 
         // Listener to set the exception handler from HttpKernel or Console App.
-        $app['debug.handlers_listener'] = $app->share(function () {
-            return new DebugHandlersListener();
+        $app['debug.handlers_listener'] = $app->share(function ($app) {
+            return new DebugHandlersListener($app['exception_handler.cli_print_trace'] ?? $app['debug']);
         });
 
         // Added by WebProviderServiceProvider
