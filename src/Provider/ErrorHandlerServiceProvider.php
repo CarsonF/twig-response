@@ -3,11 +3,11 @@
 namespace Gmo\Web\Provider;
 
 use Bolt\Common\Ini;
+use Gmo\Common\Console\Application as ConsoleApplication;
 use Gmo\Web\EventListener\DebugHandlersListener;
 use Psr\Log\LoggerInterface;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
-use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Debug\BufferingLogger;
@@ -22,6 +22,8 @@ use Symfony\Component\Debug\ExceptionHandler;
  */
 class ErrorHandlerServiceProvider implements ServiceProviderInterface
 {
+    private const CLI = PHP_SAPI === 'cli';
+
     /**
      * {@inheritdoc}
      */
@@ -42,7 +44,7 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
         // Enable handlers for web and cli, but not test runners since they have their own.
         $app['error_handler.enabled'] =
         $app['exception_handler.enabled'] =
-            PHP_SAPI !== 'cli' || !defined('PHPUNIT_COMPOSER_INSTALL');
+            !self::CLI || !defined('PHPUNIT_COMPOSER_INSTALL');
 
         $app['error_handler'] = $app->share(function () {
             return new ErrorHandler(new BufferingLogger());
@@ -66,12 +68,15 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
 
             // The ExceptionHandler by default renders HTML.
             // If we are on CLI, change it to render for CLI.
-            if (PHP_SAPI === 'cli' && class_exists(ConsoleApplication::class)) {
-                $handler->setHandler(function ($e) {
-                    $app = new ConsoleApplication();
+            if (self::CLI) {
+                $handler->setHandler(function ($e) use ($app) {
+                    $console = new ConsoleApplication();
+                    if (isset($app['root_path'])) {
+                        $console->setProjectDirectory($app['root_path']);
+                    }
                     $verbosity = ($app['exception_handler.cli_print_trace'] ?? $app['debug'])
                         ? OutputInterface::VERBOSITY_VERBOSE : OutputInterface::VERBOSITY_NORMAL;
-                    $app->renderException($e, new ConsoleOutput($verbosity));
+                    $console->renderException($e, new ConsoleOutput($verbosity));
                     ob_clean();
                 });
             }
