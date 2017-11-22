@@ -70,7 +70,7 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
                 $handler->setHandler(function ($e) {
                     $app = new ConsoleApplication();
                     $verbosity = ($app['exception_handler.cli_print_trace'] ?? $app['debug'])
-                        ? OutputInterface::VERBOSITY_VERBOSE : OutputInterface::OUTPUT_NORMAL;
+                        ? OutputInterface::VERBOSITY_VERBOSE : OutputInterface::VERBOSITY_NORMAL;
                     $app->renderException($e, new ConsoleOutput($verbosity));
                     ob_clean();
                 });
