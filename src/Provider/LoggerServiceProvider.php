@@ -111,6 +111,7 @@ class LoggerServiceProvider implements ServiceProviderInterface
                 true,
                 $app['logger.handler.logstash.cap_size'] ?? 10000
             );
+            $handler->setFormatter($app['logger.formatter.logstash']);
 
             // Fallback to syslog handler on Redis server/connection exceptions
             $handler = new FallbackHandler(
