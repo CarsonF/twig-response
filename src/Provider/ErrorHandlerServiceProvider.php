@@ -111,7 +111,7 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
             DebugClassLoader::enable();
         }
 
-        if ($app['error_handler.enabled']) {
+        if ($errorHandlerEnabled = $app['error_handler.enabled']) {
             // Report all errors since the error handler has
             // its own logging / throwing errors logic.
             error_reporting(E_ALL);
@@ -127,12 +127,14 @@ class ErrorHandlerServiceProvider implements ServiceProviderInterface
             // Set throw at value based on config value during 2nd phase.
             // (Has to be after register() as that resets the level.)
             $handler->throwAt($app['error_handler.throw_at'], true);
-
-            $this->configureLogger($handler, $app['error_handler.logger'], $app['error_handler.log_at']);
         }
 
         if ($app['exception_handler.enabled']) {
             $app['exception_handler.early']; // Invoke to register
+        }
+
+        if ($errorHandlerEnabled) {
+            $this->configureLogger($handler, $app['error_handler.logger'], $app['error_handler.log_at']);
         }
 
         // Can be subscribed regardless of enabled, because it won't do anything
