@@ -6,8 +6,12 @@ use Bolt\Collection\Arr;
 use Bolt\Collection\MutableBag;
 use Bolt\Common\Str;
 use Gmo\Common\Log\Handler\FallbackHandler;
+use Gmo\Common\Log\Handler\RateLimitingHandler;
+use Gmo\Common\Log\Processor\ExceptionTraceProcessor;
 use Gmo\Web\EventListener\HttpLogListener;
 use Gmo\Web\Logger\Formatter\LogstashFormatter;
+use Gmo\Web\Logger\Formatter\SlackFormatter;
+use Gmo\Web\Logger\Handler\SlackHandler;
 use Gmo\Web\Logger\Processor;
 use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\NullHandler;
@@ -63,6 +67,7 @@ class LoggerServiceProvider implements ServiceProviderInterface
 
             if (($env = $app['environment']) && ($env === 'production' || $env === 'staging')) {
                 $handlers[] = $app['logger.handler.logstash'];
+                $handlers[] = $app['logger.handler.slack'];
             }
 
             return $handlers;
@@ -85,6 +90,18 @@ class LoggerServiceProvider implements ServiceProviderInterface
 
         $app['logger.processor.env'] = $app->share(function ($app) {
             return new Processor\ConstantProcessor('env', $app['environment']);
+        });
+
+        $app['logger.processor.exception_trace'] = $app->share(function ($app) {
+            return new ExceptionTraceProcessor($app['root_path']);
+        });
+
+        $app['logger.processor.host'] = $app->share(function ($app) {
+            return new Processor\ConstantProcessor('host', gethostname());
+        });
+
+        $app['logger.processor.kibana_request_id'] = $app->share(function ($app) {
+            return new Processor\KibanaRequestIdUrlProcessor($app['kibana.host']);
         });
 
         $app['logger.processor.request'] = $app->share(function ($app) {
@@ -144,6 +161,31 @@ class LoggerServiceProvider implements ServiceProviderInterface
 
         $app['logger.formatter.logstash'] = $app->share(function ($app) {
             return new LogstashFormatter($app['app_name']);
+        });
+
+        //endregion
+
+        //region Slack
+
+        $app['logger.handler.slack'] = $app->share(function ($app) {
+            $slack = new SlackHandler(
+                $app['logger.handler.slack.token'],
+                $app['logger.handler.slack.channel']
+            );
+            $slack->setFormatter($app['logger.formatter.slack']);
+
+            $slack->pushProcessor($app['logger.processor.exception_trace']);
+            $slack->pushProcessor($app['logger.processor.kibana_request_id']);
+            $slack->pushProcessor($app['logger.processor.host']);
+            $slack->pushProcessor($app['logger.processor.request']);
+
+            $slack = new RateLimitingHandler($app['logger.redis'], $slack, 60);
+
+            return $slack;
+        });
+
+        $app['logger.formatter.slack'] = $app->share(function ($app) {
+            return new SlackFormatter();
         });
 
         //endregion
