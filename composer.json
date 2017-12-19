@@ -23,6 +23,7 @@
         "symfony/http-kernel": "^2.8 || ^3.3 || ^4.0",
         "symfony/monolog-bridge": "^2.8 || ^3.3 || ^4.0",
         "symfony/routing": "^2.8 || ^3.3 || ^4.0",
+        "symfony/twig-bridge": "^2.8 || ^3.3 || ^4.0",
         "symfony/validator": "^2.8 || ^3.3 || ^4.0",
         "twig/twig": "^1.31 || ^2.0"
     },
