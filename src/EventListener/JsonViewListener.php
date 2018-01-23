@@ -24,7 +24,7 @@ class JsonViewListener implements EventSubscriberInterface
     {
         $result = $event->getControllerResult();
 
-        if (!is_iterable($result) || $event->getRequest()->getRequestFormat() !== 'json') {
+        if (!is_iterable($result)) {
             return;
         }
 
